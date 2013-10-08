@@ -1,0 +1,135 @@
+
+
+DIGAUDCONSOLE Project Overview
+------------------------------------------------------------
+
+First, a quick preamble...
+I've simplified some of the code in TimeFrequency.cs related to the Fast Fourier Transformations. None of the
+functionality or logic was modified, just changes to variable names to clarify their purpose, removing some redundancies
+to make the flow a bit clearer.
+
+Genrally, you don't need to know how an FFT works (there are many permutations of them for different processing tasks), just understand
+the code itself; the loops, function calls, types of variables used, etc. If you want to optimize the performance, don't modify what the
+algorithm is doing, modify your code. For instance, the FFT implementation used in this class uses the Complex data type. You may be
+able to modify the algorithm to use integers instead and increase the performance dramatically. You may lose some precision, but for
+audio work, the loss is negligible and completely inaudible.
+You can hunt around for examples of FFT algorithms that are written using different techniques. 
+Or, you can do what I did for my Doc Management program... I use an FFT variant to detect the skew angle of a scanned page so it can
+be auto-straightened. I found a C# implementation that worked well, but took two seconds to calculate a page... so I recoded it in C :)
+After some optimization, calc time dropped to .11 seconds.
+You may be able to gain a performance increase of 2-3 times faster by adding some parallel processing in the transform algorithm, but
+you could also gain a significant increase just by switching to slightly less precise, integer based implementation. Of course, if you want to
+try to multi-thread it just to learn how to do it, go for it :)
+
+Just some thoughts... 
+
+
+
+Program.cs:
+   static void Start()
+      Sets the hard-coded filenames and calls the working functions
+   
+   public static MusicNote[] ReadXML( string filename )
+      Reads and parses a MusicXML file. The note data from the file is converted to data suitable for printing a score.
+   
+   public static void FrequencyDomain()
+      This is used to create a "Spectrum Analysis" of the WAV, could be used to graph wave frequency over time.
+      The array produced (m_PixelArray) is not currently being used by the application.
+   
+   public static void LoadWave( string filename )
+      Loads the WAV file (filename) and parses relevant information (header, etc.)  into a WaveFile object.
+      Sets member variable m_WaveIn.
+
+
+   (See code comments for more detailed info)
+   
+   
+   
+------------------------------------------------------------------------------------------------------------------------
+WaveFile.cs:
+   public WaveFile( FileStream file )
+
+   This class parses a standard WAV file and populates its member variables.
+   It assumes a specific ordering of header information (which will work), but I would recommend using a library
+   such as NAudio.
+   In addition to simplifying your code, you would also have the ability to read and process multiple types of 
+   audio files if you'd like:
+   http://naudio.codeplex.com/
+
+   All functionality is contained in the Constructor
+   See http://www.sonicspot.com/guide/wavefiles.html for a comprehensive description of each of the header chunks.
+   
+   
+   (See code comments for more detailed info)
+   
+   
+------------------------------------------------------------------------------------------------------------------------
+MusicNote.cs:
+   Represents a note element parsed from a MusicXML file
+
+   public MusicNote( double frequency, double duration )
+      frequency: The Frequency of the Note in Hertz
+      duration: The Duration of the note
+
+   All functionality is contained in the Constructor
+   
+   
+   (See code comments for more detailed info)
+
+
+
+------------------------------------------------------------------------------------------------------------------------
+TimeFrequency.cs:
+   This class performs a Time/Frequency analysis of audio data passed in as an array of floats using a 
+   Fast Fourier Transformation algorithm.
+   
+   public TimeFrequency( float[] waveDataArray, int windowSampleSize )
+      waveDataArray: The actual sound data as an array of floats between -1.0 and 1.0</param>
+      windowSampleSize: The number of sound samples to aggregate into one result
+      
+      This calculates the size of and creates the necessary Complex array and other variables necessary for the 
+      Fast Fourier Transformation algorithm
+      
+      
+   float[][] ShortTimeFourierTransform( Complex[] complexDataArray, int windowSampleSize )
+      complexDataArray: An array of Complex objects representing the wave data
+      windowSampleSize: The number of sound samples to aggregate into one result
+         *NOTE: this is a Class variable (m_WindowSampleSize), so it isn't necessary to pass it to the function
+
+   Complex[] FastFourierTransformation( Complex[] transformedDataArray )
+      transformedDataArray: A prepared array containing wave data
+   
+   
+   (See code comments for more detailed info)
+
+
+ 
+------------------------------------------------------------------------------------------------------------------------
+
+
+Helpful Sites:
+
+   This is a good site if you need information on the MusicXML file structure:
+   http://www.musicxml.com/UserManuals/MusicXML/Content/EL-MusicXML.htm
+
+   MuseScore is a nice (free!) application that can read and write MusicXML files; I'm not sure what your ultimate goals are for this program,
+   but if you need to create test files, or test-read a file that you created, it might be useful:
+   http://musescore.org/
+
+   Here are a couple of articles that explain some of the theory behind the TimeFrequency functions (WARNING - Horribly advanced math involved):
+   http://en.wikipedia.org/wiki/Frequency_domain
+   http://en.wikipedia.org/wiki/Short-time_Fourier_transform
+
+   This site may be useful if you need information on note frequencies:
+   http://inst.eecs.berkeley.edu/~ee20/sp97/demos/lec2/music.html
+
+   Here is a good explanation of how note frequencies are calculated:
+   http://www.phys.unsw.edu.au/jw/notes.html
+
+   NAudio is a very useful (and free!) audio management library useable in C#. It may help you to simplify some of your current code (WaveFile.cs)
+   and make it very easy to add audio playback or other advanced features later:
+   http://naudio.codeplex.com/
+
+   Here is a detailed description of the WAV file format:
+   http://www.sonicspot.com/guide/wavefiles.html
+ 
