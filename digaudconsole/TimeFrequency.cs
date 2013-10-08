@@ -96,11 +96,11 @@ namespace digaudconsole
             Complex[] untransformedComplexArray = new Complex[windowSampleSize];
             Complex[] tempTransformedComplexArray = new Complex[windowSampleSize];
 
-            Console.WriteLine((2 * Math.Floor((double)sourceComplexDataArrayLength / (double)windowSampleSize) - 1));
-            Console.ReadLine();
+
             //Todo threading here
             for (int windowIndex = 0; windowIndex < 2 * Math.Floor((double)sourceComplexDataArrayLength / (double)windowSampleSize) - 1; windowIndex++)
             {
+                Console.Write(".");
                 for (int windowSampleIndex = 0; windowSampleIndex < windowSampleSize; windowSampleIndex++)
                 {
                     untransformedComplexArray[windowSampleIndex] = sourceComplexDataArray[windowIndex * (windowSampleSize / 2) + windowSampleIndex];
@@ -118,8 +118,7 @@ namespace digaudconsole
                     }
                 }
             }
-            Console.WriteLine("Blah");
-            Console.ReadLine();
+
              
             for (int windowIndex = 0; windowIndex < 2 * Math.Floor((double)sourceComplexDataArrayLength / (double)windowSampleSize) - 1; windowIndex++)
             {
