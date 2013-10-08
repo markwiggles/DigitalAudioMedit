@@ -87,7 +87,7 @@ namespace digaudconsole
             //writeFile(m_WaveIn.m_Wave);
             Console.WriteLine("The size of the wave file is:" + m_WaveIn.m_Wave.Count() + "\nPress Return to continue:");
             Console.ReadLine();
-
+            
             FrequencyDomain(m_WaveIn.m_Wave);
             
             // Read and parse a MusicXML file.
