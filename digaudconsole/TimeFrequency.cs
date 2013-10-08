@@ -120,6 +120,7 @@ namespace digaudconsole
             }
             Console.WriteLine("Blah");
             Console.ReadLine();
+             
             for (int windowIndex = 0; windowIndex < 2 * Math.Floor((double)sourceComplexDataArrayLength / (double)windowSampleSize) - 1; windowIndex++)
             {
                 for (int windowSampleIndex = 0; windowSampleIndex < windowSampleSize / 2; windowSampleIndex++)
