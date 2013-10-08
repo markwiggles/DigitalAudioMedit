@@ -18,9 +18,11 @@ Or, you can do what I did for my Doc Management program... I use an FFT variant 
 be auto-straightened. I found a C# implementation that worked well, but took two seconds to calculate a page... so I recoded it in C :)
 After some optimization, calc time dropped to .11 seconds.
 
+*******
 You may be able to gain a performance increase of 2-3 times faster by adding some parallel processing in the transform algorithm, but
 you could also gain a significant increase just by switching to slightly less precise, integer based implementation. Of course, if you want to
 try to multi-thread it just to learn how to do it, go for it :)
+*******
 
 Just some thoughts... 
 
