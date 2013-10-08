@@ -62,8 +62,8 @@ namespace digaudconsole
         /// </summary>
         static void Start()
             {
-            string filename = "C:\\stuff\\jupiter.wav";
-            string xmlfile = "C:\\stuff\\jupiter.xml";
+            string filename = "AudioFiles\\jupiter.wav";
+            string xmlfile = "AudioFiles\\jupiter.xml";
 
             // Load the WAV file and create and populate a WaveFile object. Assign that object to m_WaveIn.
             LoadWave( filename );
