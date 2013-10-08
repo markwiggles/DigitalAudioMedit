@@ -33,7 +33,7 @@ using System.Xml;
  * http://www.sonicspot.com/guide/wavefiles.html
  */
 
-
+// random comment
 namespace digaudconsole
     {
     class Program
