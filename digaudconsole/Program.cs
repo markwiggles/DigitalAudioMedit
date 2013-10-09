@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.DirectX.AudioVideoPlayback; // Unused at this time, assuming there will be an audio preview in the future (See NAudio below)
 using System.IO;
 using System.Xml;
+using System.Diagnostics;
 
 /*
  This is a good site if you need information on the MusicXML file structure:
@@ -53,7 +53,16 @@ namespace digaudconsole
         /// <param name="args"></param>
         static void Main(string[] args)
         {
+            Stopwatch timer = new Stopwatch();
+
+            timer.Start();
+
             Start();
+
+            //calculate and display time
+            long duration = timer.ElapsedMilliseconds;
+            Console.WriteLine("Finished processing: " + duration + " milliseconds");
+            Console.ReadKey();
         }
 
 
