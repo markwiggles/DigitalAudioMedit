@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Xml;
 using System.Diagnostics;
+using System.Threading;
 
 /*
  This is a good site if you need information on the MusicXML file structure:
@@ -40,12 +41,20 @@ namespace digaudconsole
     {
         public enum PitchConversion { C, Db, D, Eb, E, F, Gb, G, Ab, A, Bb, B };
 
+        public static int numThreads = 4;
+        public static int countForThread;
+
         public static WaveFile m_WaveIn;
         public static TimeFrequency timeFrequency;
         public static float[] m_PixelArray;
         public static MusicNote[] m_SheetMusic;
         public static double m_BeatsPerMinute = 70;
+        public static Stopwatch timer = new Stopwatch();
 
+        public static float[] WaveArray1 = new float[] { };
+        public static float[] WaveArray2 = new float[] { };
+        public static float[] WaveArray3 = new float[] { };
+        public static float[] WaveArray4 = new float[] { };
 
         /// <summary>
         /// 
@@ -53,16 +62,13 @@ namespace digaudconsole
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            Stopwatch timer = new Stopwatch();
+            
 
-            timer.Start();
+            
 
             Start();
 
-            //calculate and display time
-            long duration = timer.ElapsedMilliseconds;
-            Console.WriteLine("Finished processing: " + duration + " milliseconds");
-            Console.ReadKey();
+
         }
 
 
@@ -96,18 +102,121 @@ namespace digaudconsole
             //writeFile(m_WaveIn.m_Wave);
             Console.WriteLine("The size of the wave file is:" + m_WaveIn.m_Wave.Count() + "\nPress Return to continue:");
             Console.ReadLine();
-            
-            FrequencyDomain(m_WaveIn.m_Wave);
-            
+            timer.Start();
+            ArrayManip(m_WaveIn.m_Wave);
+            threadstart();
+            //FrequencyDomain(m_WaveIn.m_Wave);
+            //calculate and display time
+            long duration = timer.ElapsedMilliseconds;
+            Console.Clear();
+            Console.WriteLine("Finished processing: " + duration + " milliseconds");
             // Read and parse a MusicXML file.
             m_SheetMusic = ReadXML(xmlfile);
 
-            Console.Clear();
+            
             Console.WriteLine("Process is Finished \nPress Enter to exit");
-            Console.ReadLine();
+            Console.ReadKey();
         }
 
+        public static void threadstart()
+        {
+            Thread thread = new Thread(() =>
+                {
+                    int count = 0;
+                    FrequencyDomain(WaveArray1);
+                    foreach (float a in WaveArray1)
+                    {
+                        m_WaveIn.m_Wave[count] = a;
+                        count++;
+                    }
+                });
+            thread.Start();
+            Thread thread1 = new Thread(() =>
+            {
+                int count = countForThread;
+                FrequencyDomain(WaveArray2);
 
+                foreach (float a in WaveArray2)
+                {
+                    m_WaveIn.m_Wave[count] = a;
+                    count++;
+                }
+            });
+            thread1.Start();
+            Thread thread2 = new Thread(() =>
+            {
+                int count = countForThread + countForThread;
+                FrequencyDomain(WaveArray3);
+                foreach (float a in WaveArray3)
+                {
+                    m_WaveIn.m_Wave[count] = a;
+                    count++;
+                }
+            });
+            thread2.Start();
+            Thread thread3 = new Thread(() =>
+            {
+                int count = countForThread * 3;
+                FrequencyDomain(WaveArray4);
+
+                foreach (float a in WaveArray4)
+                {
+                    m_WaveIn.m_Wave[count] = a;
+                    count++;
+                }
+
+            });
+            thread3.Start();
+
+            
+
+        }
+
+        public static void ArrayManip(float[] waveFile)
+        {
+            countForThread = waveFile.Count() / numThreads;
+            float[] a, b, c, d;
+            a = new float[countForThread];
+            b = new float[countForThread];
+            c = new float[countForThread];
+            d = new float[countForThread];
+
+            int start= 0;
+            int finish = countForThread;
+            int count = 0;
+            for (int i = start; i < finish; i++)
+            {
+                a[count] = waveFile[i];
+                count++;
+            }
+
+            start = finish;
+            finish = finish + numThreads;
+            count = 0;
+            for (int i = start; i < finish; i++)
+            {
+                b[count] = waveFile[i];
+            }
+            start = finish;
+            finish = finish + numThreads;
+            count = 0;
+            for (int i = start; i < finish; i++)
+            {
+                c[count] = waveFile[i];
+            } start = finish;
+            finish = finish + numThreads;
+            count = 0;
+            for (int i = start; i < finish; i++)
+            {
+                d[count] = waveFile[i];
+            }
+
+            WaveArray1 = a;
+            WaveArray2 = b;
+            WaveArray3 = c;
+            WaveArray4 = d;
+
+        }
         /// <summary>
         /// Reads and parses a MusicXML file. The note data from the file is converted to data suitable for printing a score.
         /// </summary>
