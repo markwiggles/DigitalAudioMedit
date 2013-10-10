@@ -7,6 +7,7 @@ using System.IO;
 using System.Xml;
 using System.Diagnostics;
 using System.Threading;
+using System.ComponentModel;
 
 /*
  This is a good site if you need information on the MusicXML file structure:
@@ -43,13 +44,15 @@ namespace digaudconsole
 
         public static int numThreads = 4;
         public static int countForThread;
-
+        long duration;
         public static WaveFile m_WaveIn;
         public static TimeFrequency timeFrequency;
         public static float[] m_PixelArray;
         public static MusicNote[] m_SheetMusic;
         public static double m_BeatsPerMinute = 70;
         public static Stopwatch timer = new Stopwatch();
+        public static Stopwatch timer1 = new Stopwatch(); 
+
 
         public static float[] WaveArray1 = new float[] { };
         public static float[] WaveArray2 = new float[] { };
@@ -118,8 +121,47 @@ namespace digaudconsole
             Console.ReadKey();
         }
 
+        public static void start(float[] Wave, int count)
+        {
+            timer1 = new Stopwatch();
+            timer1.Start();
+            var bw = new BackgroundWorker();
+
+            // define the event handlers
+            bw.DoWork += (sender, args) =>
+            {
+                // do your lengthy stuff here -- this will happen in a separate thread
+                FrequencyDomain(WaveArray1);
+                foreach (float a in Wave)
+                {
+                    m_WaveIn.m_Wave[count] = a;
+                    count++;
+                }
+
+            };
+            bw.RunWorkerCompleted += (sender, args) =>
+            {
+                if (args.Error != null)
+                {
+                }// if an exception occurred during DoWork,
+                //    MessageBox.Show(args.Error.ToString());  // do your error handling here
+
+                timer1.Stop();
+                Console.WriteLine("This thread took: " + timer1.ElapsedMilliseconds);
+                // Do whatever else you want to do after the work completed.
+                // This happens in the main UI thread.
+
+            };
+
+            bw.RunWorkerAsync(); // starts the background worker
+
+            // execution continues here in parallel to the background worker
+        }
+    
+
         public static void threadstart()
         {
+            /*
             Thread thread = new Thread(() =>
                 {
                     int count = 0;
@@ -167,14 +209,18 @@ namespace digaudconsole
 
             });
             thread3.Start();
-
-            
+            */
+            start(WaveArray1, 0);
+            start(WaveArray2, countForThread);
+            start(WaveArray2, countForThread + countForThread);
+            start(WaveArray2, countForThread + countForThread + countForThread);
 
         }
 
         public static void ArrayManip(float[] waveFile)
         {
             countForThread = waveFile.Count() / numThreads;
+           /*
             float[] a, b, c, d;
             a = new float[countForThread];
             b = new float[countForThread];
@@ -215,6 +261,15 @@ namespace digaudconsole
             WaveArray2 = b;
             WaveArray3 = c;
             WaveArray4 = d;
+            */
+            WaveArray1 = new float[countForThread];
+            WaveArray2 = new float[countForThread];
+            WaveArray3 = new float[countForThread];
+            WaveArray4 = new float[countForThread];
+            Array.Copy(m_WaveIn.m_Wave, 0, WaveArray1, 0, countForThread);
+            Array.Copy(m_WaveIn.m_Wave, countForThread, WaveArray2, 0, countForThread);
+            Array.Copy(m_WaveIn.m_Wave, countForThread * 2, WaveArray3, 0, countForThread);
+            Array.Copy(m_WaveIn.m_Wave, countForThread * 3, WaveArray4, 0, countForThread);
 
         }
         /// <summary>
