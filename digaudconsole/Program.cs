@@ -65,8 +65,6 @@ namespace digaudconsole
         static void Main(string[] args)
             {
             Start();
-
-
             }
 
 
@@ -132,8 +130,8 @@ namespace digaudconsole
                     m_WaveIn.m_Wave[count] = a;
                     count++;
                 }
-
             };
+
             bw.RunWorkerCompleted += (sender, args) =>
             {
                 if (args.Error != null)
@@ -207,8 +205,8 @@ namespace digaudconsole
             */
             start(WaveArray1, 0);
             start(WaveArray2, countForThread);
-            start(WaveArray2, countForThread + countForThread);
-            start(WaveArray2, countForThread + countForThread + countForThread);
+            start(WaveArray3, countForThread + countForThread);
+            start(WaveArray4, countForThread + countForThread + countForThread);
 
         }
 
