@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Xml;
 using System.Diagnostics;
-
-
+using System.Threading;
+using System.Windows.Forms;
 /*
  This is a good site if you need information on the MusicXML file structure:
  * http://www.musicxml.com/UserManuals/MusicXML/Content/EL-MusicXML.htm
@@ -41,7 +41,7 @@ namespace digaudconsole
         {
         public enum PitchConversion { C, Db, D, Eb, E, F, Gb, G, Ab, A, Bb, B };
 
-        public static int numThreads = 4;
+        public static int numThreads = 1;
         public static int countForThread;
         long duration;
         public static WaveFile m_WaveIn;
@@ -57,13 +57,15 @@ namespace digaudconsole
         public static float[] WaveArray2 = new float[] { };
         public static float[] WaveArray3 = new float[] { };
         public static float[] WaveArray4 = new float[] { };
-
+        static List<Thread> threadList = new List<Thread>();
         static List<float[]> wavelist = new List<float[]>();
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="args"></param>
+        /// 
+        [STAThread]
         static void Main(string[] args)
             {
             Start();
@@ -87,8 +89,8 @@ namespace digaudconsole
         }
         static void Start()
             {
-            string filename = "jupiter.wav";
-            string xmlfile = "jupiter.xml";
+            string filename = DialogBox(false);
+            string xmlfile = DialogBox(true);
 
             // Load the WAV file and create and populate a WaveFile object. Assign that object to m_WaveIn.
             LoadWave(filename);
@@ -98,11 +100,22 @@ namespace digaudconsole
             // Create a "Spectrum Analysis" type map of the WAV file and set m_PixelArray with the resulting data. (Currently unused)
 
             //writeFile(m_WaveIn.m_Wave);
-            Console.WriteLine("The size of the wave file is:" + m_WaveIn.m_Wave.Count() + "\nPress Return to continue:");
-            Console.ReadLine();
+            Console.WriteLine("The size of the wave file is:" + m_WaveIn.m_Wave.Count() + "\nEnter how many threads to use: ");
+            string ans = Console.ReadLine();
+            
+            try
+            {
+                numThreads = int.Parse(ans); 
+            }
+            catch
+            {
+                Console.WriteLine("You need to enter again. Goodbye");
+                Console.ReadKey();
+                return;
+            }
             timer.Start();
-            ArrayManip(m_WaveIn.m_Wave);
-            threadstart();
+        
+            threadstart(m_WaveIn.m_Wave);
             //FrequencyDomain(m_WaveIn.m_Wave);
             //calculate and display time
             long duration = timer.ElapsedMilliseconds;
@@ -116,109 +129,26 @@ namespace digaudconsole
             Console.ReadKey();
         }
 
-        public static void threadingstart(float[] Wave, int count)
+        public static void threadingProc(float[] Wave, int count)
         {
-            timer1 = new Stopwatch();
-            timer1.Start();
-            var bw = new System.ComponentModel.BackgroundWorker();
 
-            // define the event handlers
-            bw.DoWork += (sender, args) =>
-            {
-                // do your lengthy stuff here -- this will happen in a separate thread
-                FrequencyDomain(Wave);
-                //foreach (float a in Wave)
-                //{
-                 //   m_WaveIn.m_Wave[count] = a;
-                  //  count++;
-                //}
-
-                Array.Copy(Wave, 0, m_WaveIn.m_Wave, count, countForThread);
-            };
-
-            bw.RunWorkerCompleted += (sender, args) =>
-            {
-                if (args.Error != null)
-                {
-                }// if an exception occurred during DoWork,
-                //    MessageBox.Show(args.Error.ToString());  // do your error handling here
-
-                timer1.Stop();
-                Console.WriteLine("This thread took: " + timer1.ElapsedMilliseconds);
-                // Do whatever else you want to do after the work completed.
-                // This happens in the main UI thread.
-
-            };
-
-            bw.RunWorkerAsync(); // starts the background worker
-
-            // execution continues here in parallel to the background worker
-        }
-    
-
-        public static void threadstart()
-        {
-            /*
             Thread thread = new Thread(() =>
                 {
-                    int count = 0;
-                    FrequencyDomain(WaveArray1);
-                    foreach (float a in WaveArray1)
-                    {
-                        m_WaveIn.m_Wave[count] = a;
-                        count++;
-                    }
+                    FrequencyDomain(Wave);
+                    Array.Copy(Wave, 0, m_WaveIn.m_Wave, count, countForThread);
                 });
-            thread.Start();
-            Thread thread1 = new Thread(() =>
-            {
-                int count = countForThread;
-                FrequencyDomain(WaveArray2);
+            threadList.Add(thread);
+           
 
-                foreach (float a in WaveArray2)
-                {
-                    m_WaveIn.m_Wave[count] = a;
-                    count++;
-                }
-            });
-            thread1.Start();
-            Thread thread2 = new Thread(() =>
-            {
-                int count = countForThread + countForThread;
-                FrequencyDomain(WaveArray3);
-                foreach (float a in WaveArray3)
-                {
-                    m_WaveIn.m_Wave[count] = a;
-                    count++;
-                }
-            });
-            thread2.Start();
-            Thread thread3 = new Thread(() =>
-            {
-                int count = countForThread * 3;
-                FrequencyDomain(WaveArray4);
-
-                foreach (float a in WaveArray4)
-                {
-                    m_WaveIn.m_Wave[count] = a;
-                    count++;
-                }
-
-            });
-            thread3.Start();
-            */
-            int start = 0;
-            foreach (float[] temp in wavelist)
-            {
-                threadingstart(temp, start);
-                start += countForThread;
-            }
         }
 
-        public static void ArrayManip(float[] waveFile)
+
+        public static void threadstart(float[] waveFile)
         {
+
             countForThread = waveFile.Count() / numThreads;
 
+            //Split the array into numthreads
             int start = 0;
             for (int i = 0; i < numThreads; i++)
             {
@@ -227,7 +157,26 @@ namespace digaudconsole
                 wavelist.Add(temp);
                 start += countForThread;
             }
+
+            //start threads
+            start = 0;
+            foreach (float[] temp in wavelist)
+            {
+                threadingProc(temp, start);
+                start += countForThread;
+            }
+            foreach (Thread thread in threadList)
+            {
+                thread.Start();
+            }
+
+            foreach (Thread thread in threadList)
+            {
+                thread.Join();
+            }
+
         }
+
         /// <summary>
         /// Reads and parses a MusicXML file. The note data from the file is converted to data suitable for printing a score.
         /// </summary>
@@ -391,5 +340,29 @@ namespace digaudconsole
                 m_WaveIn = new WaveFile(fileStream);
                 }
             }
+
+        public static string DialogBox(bool isXml)
+        {
+            
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Multiselect = false;
+            if (isXml)
+            {
+                openFileDialog.Filter = "XML File|*.xml";
+                openFileDialog.Title = "Select a XML File";
+            }
+            else
+            {
+                openFileDialog.Filter = "Wave File|*.wav";
+                openFileDialog.Title = "Select a Wave File";
+            }
+            
+
+            if (openFileDialog.ShowDialog() == DialogResult.OK)
+            {
+                return openFileDialog.FileName;
+            }
+            else return null;
+        }
         }
     }
