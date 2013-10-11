@@ -50,8 +50,8 @@ namespace digaudconsole
         public static MusicNote[] m_SheetMusic;
         public static double m_BeatsPerMinute = 70;
         public static Stopwatch timer = new Stopwatch();
-        public static Stopwatch timer1 = new Stopwatch(); 
-
+        public static Stopwatch timer1 = new Stopwatch();
+        static bool isfin = true;
 
         public static float[] WaveArray1 = new float[] { };
         public static float[] WaveArray2 = new float[] { };
@@ -67,9 +67,24 @@ namespace digaudconsole
         /// 
         [STAThread]
         static void Main(string[] args)
+        {
+            while(isfin)
             {
-            Start();
+                Start();
+                Console.WriteLine("Do you wish to run again? Yes or No");
+                string ans = Console.ReadLine();
+                if (ans == "Yes" || ans == "Y" || ans == "y" || ans == "yes")
+                {
+                    Start();
+                }
+                else
+                {
+                    isfin = false;
+                    return;
+                }
             }
+            
+        }
 
 
         /// <summary>
