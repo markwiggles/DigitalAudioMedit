@@ -58,6 +58,8 @@ namespace digaudconsole
         public static float[] WaveArray3 = new float[] { };
         public static float[] WaveArray4 = new float[] { };
 
+        static List<float[]> wavelist = new List<float[]>();
+
         /// <summary>
         /// 
         /// </summary>
@@ -114,7 +116,7 @@ namespace digaudconsole
             Console.ReadKey();
         }
 
-        public static void start(float[] Wave, int count)
+        public static void threadingstart(float[] Wave, int count)
         {
             timer1 = new Stopwatch();
             timer1.Start();
@@ -124,12 +126,14 @@ namespace digaudconsole
             bw.DoWork += (sender, args) =>
             {
                 // do your lengthy stuff here -- this will happen in a separate thread
-                FrequencyDomain(WaveArray1);
-                foreach (float a in Wave)
-                {
-                    m_WaveIn.m_Wave[count] = a;
-                    count++;
-                }
+                FrequencyDomain(Wave);
+                //foreach (float a in Wave)
+                //{
+                 //   m_WaveIn.m_Wave[count] = a;
+                  //  count++;
+                //}
+
+                Array.Copy(Wave, 0, m_WaveIn.m_Wave, count, countForThread);
             };
 
             bw.RunWorkerCompleted += (sender, args) =>
@@ -203,67 +207,26 @@ namespace digaudconsole
             });
             thread3.Start();
             */
-            start(WaveArray1, 0);
-            start(WaveArray2, countForThread);
-            start(WaveArray3, countForThread + countForThread);
-            start(WaveArray4, countForThread + countForThread + countForThread);
-
+            int start = 0;
+            foreach (float[] temp in wavelist)
+            {
+                threadingstart(temp, start);
+                start += countForThread;
+            }
         }
 
         public static void ArrayManip(float[] waveFile)
         {
             countForThread = waveFile.Count() / numThreads;
-           /*
-            float[] a, b, c, d;
-            a = new float[countForThread];
-            b = new float[countForThread];
-            c = new float[countForThread];
-            d = new float[countForThread];
 
-            int start= 0;
-            int finish = countForThread;
-            int count = 0;
-            for (int i = start; i < finish; i++)
+            int start = 0;
+            for (int i = 0; i < numThreads; i++)
             {
-                a[count] = waveFile[i];
-                count++;
+                float[] temp = new float[countForThread];
+                Array.Copy(m_WaveIn.m_Wave, start, temp, 0, countForThread);
+                wavelist.Add(temp);
+                start += countForThread;
             }
-
-            start = finish;
-            finish = finish + numThreads;
-            count = 0;
-            for (int i = start; i < finish; i++)
-            {
-                b[count] = waveFile[i];
-            }
-            start = finish;
-            finish = finish + numThreads;
-            count = 0;
-            for (int i = start; i < finish; i++)
-            {
-                c[count] = waveFile[i];
-            } start = finish;
-            finish = finish + numThreads;
-            count = 0;
-            for (int i = start; i < finish; i++)
-            {
-                d[count] = waveFile[i];
-            }
-
-            WaveArray1 = a;
-            WaveArray2 = b;
-            WaveArray3 = c;
-            WaveArray4 = d;
-            */
-            WaveArray1 = new float[countForThread];
-            WaveArray2 = new float[countForThread];
-            WaveArray3 = new float[countForThread];
-            WaveArray4 = new float[countForThread];
-            Array.Copy(m_WaveIn.m_Wave, 0, WaveArray1, 0, countForThread);
-            Array.Copy(m_WaveIn.m_Wave, countForThread, WaveArray2, 0, countForThread);
-            Array.Copy(m_WaveIn.m_Wave, countForThread * 2, WaveArray3, 0, countForThread);
-            Array.Copy(m_WaveIn.m_Wave, countForThread * 3, WaveArray4, 0, countForThread);
-
         }
         /// <summary>
         /// Reads and parses a MusicXML file. The note data from the file is converted to data suitable for printing a score.
