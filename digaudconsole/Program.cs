@@ -43,20 +43,15 @@ namespace digaudconsole
 
         public static int numThreads = 1;
         public static int countForThread;
-        long duration;
+
         public static WaveFile m_WaveIn;
         public static TimeFrequency timeFrequency;
         public static float[] m_PixelArray;
         public static MusicNote[] m_SheetMusic;
         public static double m_BeatsPerMinute = 70;
         public static Stopwatch timer = new Stopwatch();
-        public static Stopwatch timer1 = new Stopwatch();
         static bool isfin = true;
 
-        public static float[] WaveArray1 = new float[] { };
-        public static float[] WaveArray2 = new float[] { };
-        public static float[] WaveArray3 = new float[] { };
-        public static float[] WaveArray4 = new float[] { };
         static List<Thread> threadList = new List<Thread>();
         static List<float[]> wavelist = new List<float[]>();
 
@@ -68,7 +63,7 @@ namespace digaudconsole
         [STAThread]
         static void Main(string[] args)
         {
-            while(isfin)
+            do
             {
                 Start();
                 Console.WriteLine("Do you wish to run again? Yes or No");
@@ -82,7 +77,7 @@ namespace digaudconsole
                     isfin = false;
                     return;
                 }
-            }
+            } while (isfin);
             
         }
 
@@ -128,6 +123,7 @@ namespace digaudconsole
                 Console.ReadKey();
                 return;
             }
+            timer = new Stopwatch();
             timer.Start();
         
             threadstart(m_WaveIn.m_Wave);
@@ -146,7 +142,7 @@ namespace digaudconsole
 
         public static void threadingProc(float[] Wave, int count)
         {
-
+            
             Thread thread = new Thread(() =>
                 {
                     FrequencyDomain(Wave);
@@ -161,7 +157,9 @@ namespace digaudconsole
         public static void threadstart(float[] waveFile)
         {
 
+            threadList = new List<Thread>();
             countForThread = waveFile.Count() / numThreads;
+            wavelist = new List<float[]>();
 
             //Split the array into numthreads
             int start = 0;
