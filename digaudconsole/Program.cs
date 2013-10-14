@@ -83,11 +83,11 @@ namespace DigitalAudio
 
 
         /// <summary>
-        /// Hmmm... starts the program...
+        /// writes to a test file...
         /// </summary>
         /// 
 
-        static void writeFile(float[] wave)
+        static void WriteFile(float[] wave)
         {
             string txtfile = "c:\\Users\\tv1\\Desktop\\test.txt";
             StreamWriter sw = new StreamWriter(txtfile);
@@ -126,7 +126,7 @@ namespace DigitalAudio
             timer = new Stopwatch();
             timer.Start();
         
-            threadstart(m_WaveIn.m_Wave);
+            ThreadStart(m_WaveIn.m_Wave);
             //FrequencyDomain(m_WaveIn.m_Wave);
             //calculate and display time
             long duration = timer.ElapsedMilliseconds;
@@ -154,7 +154,7 @@ namespace DigitalAudio
         }
 
 
-        public static void threadstart(float[] waveFile)
+        public static void ThreadStart(float[] waveFile)
         {
 
             threadList = new List<Thread>();
