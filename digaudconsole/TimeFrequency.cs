@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Numerics;
 
-namespace digaudconsole
+namespace DigitalAudio
 {
     /// <summary>
     /// This class performs a Time/Frequency analysis of audio data passed in as an array of floats using a Fast Fourier Transformation algorithm.

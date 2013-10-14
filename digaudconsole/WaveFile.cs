@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace digaudconsole
+namespace DigitalAudio
     {
     /// <summary>
     /// This class parses a standard WAV file and populates its member variables. It assumes a specific ordering of header information (which will work), but I would recommend using a library such as NAudio.

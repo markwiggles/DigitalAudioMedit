@@ -35,7 +35,7 @@ using System.Windows.Forms;
  */
 
 // random comment
-namespace digaudconsole
+namespace DigitalAudio
     {
     class Program
         {

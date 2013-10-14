@@ -7,7 +7,7 @@
     <ProjectGuid>{3D258FDD-13C3-4F9F-8F62-E584D71F83F8}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>digaudconsole</RootNamespace>
+    <RootNamespace>DigitalAudio</RootNamespace>
     <AssemblyName>digaudconsole</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
