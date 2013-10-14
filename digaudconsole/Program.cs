@@ -140,7 +140,7 @@ namespace DigitalAudio
             Console.ReadKey();
         }
 
-        public static void threadingProc(float[] Wave, int count)
+        public static void ThreadingProc(float[] Wave, int count)
         {
             
             Thread thread = new Thread(() =>
@@ -175,7 +175,7 @@ namespace DigitalAudio
             start = 0;
             foreach (float[] temp in wavelist)
             {
-                threadingProc(temp, start);
+                ThreadingProc(temp, start);
                 start += countForThread;
             }
             foreach (Thread thread in threadList)
